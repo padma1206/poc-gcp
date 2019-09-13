@@ -1,0 +1,68 @@
+/**
+ * Triggered from a message on a Cloud Pub/Sub topic.
+ *
+ * @param {!Object} event Event payload.
+ * @param {!Object} context Metadata for the event.
+ */
+const PubSub = require(`@google-cloud/pubsub`);
+exports.helloPubSub = (req, res) => {
+  const pubsubMessage = req.data;
+  console.log(Buffer.from(pubsubMessage, 'base64').toString());
+}
+const pubsub = new PubSub();
+const data='pubsub';
+const dataBuffer = Buffer.from(data);
+const topicName = 'task11';
+  
+pubsub
+    .topic(topicName)
+    .publisher()
+    .publish(dataBuffer)
+    .then(messageId => {
+      console.log(`Message ${messageId} published.`);
+    });
+const {Spanner} = require('@google-cloud/spanner');
+const p_Id = 'qwiklabs-gcp-533e4aec9c791de6';
+const instance_Id = 'task11';
+const database_Id = 'task11_database';
+const spanner = new Spanner({
+p_Id:p_Id
+});
+
+const instance = spanner.instance(instance_Id);
+const database = instance.database(database_Id);
+const task = database.table('task');
+var dataArray=[];
+var output={};
+
+exports.helloGCS = (event, context) => {
+var datastream=pubsub
+.topic('sddf')
+.createReadStream();
+csv.parseStream(datastream,{headers:true})
+.on('data',function(data){
+dataArray.push(data);
+})
+
+.on('end',()=>{
+console.log(dataArray);
+output['Rows processed']=dataArray.length;
+console.log(output);
+});
+async function upload(){
+try {
+await task.insert(dataArray);
+console.log("recordsProcessed: ");
+}
+catch (err) {
+console.error('ERROR:', err);
+}
+finally {
+await database.close();
+}
+}
+upload();
+};
+
+
+
