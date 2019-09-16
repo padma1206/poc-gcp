@@ -4,58 +4,44 @@
  * @param {!Object} event Event payload.
  * @param {!Object} context Metadata for the event.
  */
+
+
 const PubSub = require(`@google-cloud/pubsub`);
 exports.helloPubSub = (req, res) => {
   const pubsubMessage = req.data;
   console.log(Buffer.from(pubsubMessage, 'base64').toString());
-}
-const pubsub = new PubSub();
-const data='pubsub';
-const dataBuffer = Buffer.from(data);
-const topicName = 'task11';
   
-pubsub
-    .topic(topicName)
-    .publisher()
-    .publish(dataBuffer)
-    .then(messageId => {
-      console.log(`Message ${messageId} published.`);
-    });
+
 const {Spanner} = require('@google-cloud/spanner');
-const p_Id = 'qwiklabs-gcp-533e4aec9c791de6';
-const instance_Id = 'task11';
-const database_Id = 'task11_database';
+  // Creates a client
 const spanner = new Spanner({
-p_Id:p_Id
+projectId:'poetic-bison-250611',
 });
+// Gets a reference to a Cloud Spanner instance and database
+const instance = spanner.instance('task11');
+const database = instance.database('task11_database');
+const table = database.table('task');
 
-const instance = spanner.instance(instance_Id);
-const database = instance.database(database_Id);
-const task = database.table('task');
-var dataArray=[];
+const pubsub = new PubSub();
+var dataArray=[]; 
 var output={};
-
-exports.helloGCS = (event, context) => {
-var datastream=pubsub
-.topic('sddf')
-.createReadStream();
-csv.parseStream(datastream,{headers:true})
-.on('data',function(data){
-dataArray.push(data);
-})
-
+pubsub.getTopicsStream()
+  .on('data', function(data) {
+  dataArray.push(data);
+   })
 .on('end',()=>{
 console.log(dataArray);
 output['Rows processed']=dataArray.length;
-console.log(output);
+  console.log(output);
 });
+  
 async function upload(){
+console.log("Reading Completed.");
 try {
-await task.insert(dataArray);
-console.log("recordsProcessed: ");
+await table.insert(dataArray)
 }
 catch (err) {
-console.error('ERROR:', err);
+console.error('error', err);
 }
 finally {
 await database.close();
@@ -63,6 +49,3 @@ await database.close();
 }
 upload();
 };
-
-
-
